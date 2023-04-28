@@ -45,6 +45,7 @@ class MainWindow(QMainWindow):
 
         # connect buttons
         self.ui.get_video_info.clicked.connect(self.get_video_info)
+        self.ui.timeout.valueChanged.connect(self.slider_changed)
 
         self.ui.show()
 
@@ -67,6 +68,11 @@ class MainWindow(QMainWindow):
             # oops
             logger.error("FAILED to parse.")
             self.ui.get_video_info.setEnabled(True)
+
+    @QtCore.Slot()
+    def slider_changed(self):
+        timeout = self.ui.timeout.value()
+        self.ui.timeout_value.setText(str(timeout) + "秒")
 
     @QtCore.Slot()
     def get_video_info(self):
