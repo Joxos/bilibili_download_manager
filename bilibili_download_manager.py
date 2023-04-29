@@ -7,7 +7,6 @@ from PySide6.QtWidgets import *
 from PySide6 import QtCore
 from PySide6.QtUiTools import QUiLoader
 
-timeout = 10
 p = compile(
     r"""
     [\s\S]*                # skip site info
@@ -45,15 +44,13 @@ class MainWindow(QMainWindow):
 
         # connect buttons
         self.ui.get_video_info.clicked.connect(self.get_video_info)
-        self.ui.timeout.valueChanged.connect(self.slider_changed)
 
         self.ui.show()
 
     def you_get_video_info(self):
-        args = ["you-get", "-t", str(timeout), "-i", self.ui.video_addr.text()]
+        args = ["you-get", "-i", self.ui.video_addr.text()]
         logger.info(f"Executing: {' '.join(args)}")
         proc = Popen(args, stdout=PIPE)
-        sleep(timeout + 1)
         res = proc.stdout.read().decode()
         logger.debug(res)
         m = p.match(res)
@@ -62,17 +59,12 @@ class MainWindow(QMainWindow):
             self.ui.format.setText(
                 f"{m.group('dash_container')} ({m.group('dash_format')})")
             self.ui.quality.setText(m.group("dash_quality"))
-            self.ui.video_size.setText(m.group("dash_size"))
+            self.ui.video_size.setText(f"{m.group('dash_size')} MiB")
             self.ui.get_video_info.setEnabled(True)
         else:
             # oops
             logger.error("FAILED to parse.")
             self.ui.get_video_info.setEnabled(True)
-
-    @QtCore.Slot()
-    def slider_changed(self):
-        timeout = self.ui.timeout.value()
-        self.ui.timeout_value.setText(str(timeout) + "秒")
 
     @QtCore.Slot()
     def get_video_info(self):
